@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% block title %}HireSmart AI — Build ATS-Friendly Resumes That Get Hired{% endblock %}
+
+{% block content %}
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="hero-section" id="home">
+  <div class="hero-bg">
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>
+    <div class="hero-orb orb-3"></div>
+    <div class="hero-grid"></div>
+  </div>
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6 hero-content">
+        <div class="hero-badge">
+          <i class="fa-solid fa-star"></i> #1 Resume Builder for Students & Freshers
+        </div>
+        <h1 class="hero-title">
+          Build Resumes That<br>
+          <span class="text-gradient">Actually Get Hired</span>
+        </h1>
+        <p class="hero-subtitle">
+          Create professional, ATS-optimized resumes in minutes. Our AI-powered builder ensures your resume passes through applicant tracking systems and lands in front of real recruiters.
+        </p>
+        <div class="hero-cta">
+          {% if session.get('user_id') %}
+            <a href="{{ url_for('new_resume') }}" class="btn btn-primary-glow px-4 py-3">
+              <i class="fa-solid fa-file-pen me-2"></i>Build New Resume
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary-custom px-4 py-3">
+              <i class="fa-solid fa-gauge me-2"></i>Dashboard
+            </a>
+          {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary-glow px-4 py-3">
+              <i class="fa-solid fa-rocket me-2"></i>Get Started Free
+            </a>
+            <a href="#how-it-works" class="btn btn-outline-primary-custom px-4 py-3">
+              <i class="fa-solid fa-play me-2"></i>See How It Works
+            </a>
+          {% endif %}
+        </div>
+        <div class="mt-4 d-flex align-items-center gap-3">
+          <div class="d-flex">
+            {% for i in range(5) %}
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,hsl({{ i*60 }},80%,60%),hsl({{ i*60+40 }},80%,40%));border:2px solid var(--bg-dark);margin-left:{{ '-8px' if i > 0 else '0' }};"></div>
+            {% endfor %}
+          </div>
+          <p class="mb-0 small text-muted">
+            <strong class="text-primary-custom">10,000+ students already building better resumes</strong> 
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-illustration">
+          <div class="position-relative">
+            <div class="resume-mockup">
+              <div class="mockup-header">
+                <div class="mockup-avatar"><img src="{{ url_for('static', filename='../static/img/profile.jpeg') }}" alt="profile"></div>
+                <div>
+                  <div class="mockup-name">Rushikesh Narawade</div>
+                  <div class="mockup-role">Full Stack Developer</div>
+                </div>
+              </div>
+              <div class="mockup-line w-90"></div>
+              <div class="mockup-line w-70"></div>
+              <div class="mockup-section-title">Technical Skills</div>
+              <div class="mockup-badge">
+                <span class="mockup-tag">SAP ABAP</span>
+                <span class="mockup-tag">Flutter</span>
+                <span class="mockup-tag">Kotlin</span>
+                <span class="mockup-tag">Python</span>
+                <span class="mockup-tag">JAVA</span>
+                <span class="mockup-tag">Flutter</span>
+                <span class="mockup-tag">Kotlin</span>
+                <span class="mockup-tag">SQL</span>
+                <span class="mockup-tag">PHP</span>
+                <span class="mockup-tag">Docker</span>
+              </div>
+              <div class="mockup-section-title">Education</div>
+              <div class="mockup-line w-90"></div>
+              <div class="mockup-line w-50"></div>
+              <div class="mockup-section-title">Projects</div>
+              <div class="mockup-line w-90"></div>
+              <div class="mockup-line w-70"></div>
+              <div class="mockup-line w-50"></div>
+            </div>
+            <div class="ats-score-ring">
+              <div class="score-num">98</div>
+              <div class="score-label">ATS Score</div>
+            </div>
+            <!-- Floating badges -->
+            <div style="position:absolute;bottom:-1rem;left:-1rem;
+                        background:var(--bg-card2);border:1px solid rgba(16,185,129,0.4);
+                        border-radius:12px;padding:0.75rem 1rem;
+                        display:flex;align-items:center;gap:0.5rem;
+                        box-shadow:0 0 20px rgba(16,185,129,0.2);">
+              <i class="fa-solid fa-check-circle text-success"></i>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:var(--text-main);">ATS Compatible</div>
+                <div style="font-size:0.65rem;color:var(--text-dim);">Passes all scanners</div>
+              </div>
+            </div>
+            <div style="position:absolute;top:-1rem;right:5rem;
+                        background:var(--bg-card2);border:1px solid rgba(0,212,255,0.4);
+                        border-radius:12px;padding:0.6rem 1rem;font-size:0.75rem;font-weight:700;
+                        color:var(--primary);box-shadow:0 0 16px rgba(0,212,255,0.2);">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i>AI-Powered
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ STATS ════════════════════ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="row g-4">
+      {% set stats = [
+        ('10K+', 'Resumes Created', 'fa-file-text', 10000, '+'),
+        ('95%',  'ATS Pass Rate',   'fa-chart-line', 95, '%'),
+        ('150+', 'Partner Colleges','fa-graduation-cap', 150, '+'),
+        ('500+', 'Recruiters Trust','fa-handshake', 500, '+'),
+      ] %}
+      {% for num, label, icon, target, suffix in stats %}
+      <div class="col-sm-6 col-lg-3 animate-on-scroll">
+        <div class="stat-card">
+          <div class="mb-2" style="font-size:2rem;color:var(--primary);">
+            <i class="fa-solid {{ icon }}"></i>
+          </div>
+          <div class="stat-number" data-counter data-target="{{ target }}" data-suffix="{{ suffix }}">{{ num }}</div>
+          <div class="stat-label">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ FEATURES ════════════════════ -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="text-center mb-5 animate-on-scroll">
+      <div class="section-tag">Features</div>
+      <h2 class="section-title">Everything You Need to <span class="text-gradient">Get Hired</span></h2>
+      <p class="text-muted mt-3 mx-auto" style="max-width:500px;">
+        Our comprehensive resume builder is designed specifically for students and freshers entering the job market.
+      </p>
+    </div>
+    <div class="row g-4">
+      {% set features = [
+        ('fa-robot',          'AI Writing Suggestions',  'Get smart suggestions for your professional summary, skills, and achievements powered by AI.'),
+        ('fa-check-double',   'ATS-Optimized Format',    'Our templates are tested against major ATS systems to ensure your resume always gets through.'),
+        ('fa-list-check',     'Step-by-Step Builder',    'Guided multi-step form makes it easy to fill every section without missing anything important.'),
+        ('fa-file-image',     'Photo Upload Support',    'Add your professional photo to make a lasting visual impression on recruiters.'),
+        ('fa-file-pdf',       'Instant PDF Download',   'Download a pixel-perfect PDF resume ready for instant submission to any job portal.'),
+        ('fa-key',            'Keyword Optimization',    'Automatically suggest industry-relevant keywords to beat ATS and rank higher.'),
+        ('fa-eye',            'Live Preview',            'See your resume update in real-time as you type and fine-tune before downloading.'),
+        ('fa-shield-halved',  'Secure & Private',        'Your data is encrypted and never shared. Your resume stays yours, always.'),
+      ] %}
+      {% for icon, title, desc in features %}
+      <div class="col-sm-6 col-lg-3 animate-on-scroll">
+        <div class="hs-card h-100">
+          <div class="feature-icon-wrap"><i class="fa-solid {{ icon }} text-white"></i></div>
+          <div class="feature-title">{{ title }}</div>
+          <div class="feature-desc">{{ desc }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ HOW IT WORKS ════════════════════ -->
+<section class="steps-section" id="how-it-works">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6 animate-on-scroll">
+        <div class="section-tag">How It Works</div>
+        <h2 class="section-title mb-4">Ready in <span class="text-gradient">5 Simple Steps</span></h2>
+        {% set steps = [
+          ('01', 'Create Your Account', 'Sign up for free in seconds. No credit card required.'),
+          ('02', 'Verify Your Email',   'Quick OTP verification to secure your account.'),
+          ('03', 'Fill Resume Details', 'Use our guided 8-step form to add all your information.'),
+          ('04', 'Preview & Review',    'See your professional ATS-friendly resume in real time.'),
+          ('05', 'Download & Apply',    'Download a perfect PDF and start applying to your dream jobs!'),
+        ] %}
+        {% for num, title, desc in steps %}
+        <div class="step-item animate-on-scroll">
+          <div class="step-num">{{ num }}</div>
+          <div>
+            <div class="step-title">{{ title }}</div>
+            <div class="step-desc">{{ desc }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-lg-6 animate-on-scroll">
+        <!-- Visual flow diagram -->
+        <div class="glass-card p-4">
+          <div class="text-center mb-4">
+            <span class="section-tag">Resume Preview</span>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:1.5rem;color:#333;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;
+                        padding-bottom:1rem;border-bottom:2px solid #00b4d8;">
+              <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1a1a4e,#00b4d8);
+                          display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;">A</div>
+              <div>
+                <div style="font-size:1.2rem;font-weight:800;color:#1a1a4e;">Rutika Pardhi</div>
+                <div style="color:#00b4d8;font-size:0.85rem;">Software Engineer</div>
+                <div style="color:#666;font-size:0.75rem;">📧 rutika@email.com | 📱 +91 98765 43210</div>
+              </div>
+            </div>
+            <div style="font-size:0.6rem;font-weight:800;letter-spacing:3px;color:#1a1a4e;text-transform:uppercase;border-bottom:1px solid #dee2e6;padding-bottom:4px;margin-bottom:8px;">Technical Skills</div>
+            <div style="font-size:0.78rem;color:#555;margin-bottom:12px;">
+              <span style="font-weight:700;color:#1a1a4e;">Languages:</span> Python, Java, JavaScript, C++<br>
+              <span style="font-weight:700;color:#1a1a4e;">Tools:</span> React, Node.js, Flask, Git, Docker
+            </div>
+            <div style="font-size:0.6rem;font-weight:800;letter-spacing:3px;color:#1a1a4e;text-transform:uppercase;border-bottom:1px solid #dee2e6;padding-bottom:4px;margin-bottom:8px;">Education</div>
+            <div style="font-size:0.78rem;color:#555;margin-bottom:12px;">
+              <span style="font-weight:700;color:#1a1a4e;">B.Tech Computer Science</span><br>
+              IIT Delhi | 2024 | 8.9 GPA
+            </div>
+            <div style="font-size:0.6rem;font-weight:800;letter-spacing:3px;color:#1a1a4e;text-transform:uppercase;border-bottom:1px solid #dee2e6;padding-bottom:4px;margin-bottom:8px;">Projects</div>
+            <div style="font-size:0.78rem;color:#555;">
+              <span style="font-weight:700;color:#1a1a4e;">E-Commerce Platform</span>
+              <span style="background:#e8f4ff;color:#1a1a4e;font-size:0.65rem;padding:1px 6px;border-radius:99px;">React, Node.js</span><br>
+              • Built scalable platform handling 10,000+ daily transactions
+            </div>
+          </div>
+          <div class="text-center mt-3">
+            <span style="color:var(--success);font-size:0.8rem;font-weight:700;">
+              <i class="fa-solid fa-check-circle me-1"></i>ATS Score: 98/100
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ WHY ATS MATTERS ════════════════════ -->
+<section class="ats-section">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6 animate-on-scroll">
+        <div class="section-tag">Why ATS Matters</div>
+        <h2 class="section-title mb-3">75% of Resumes Never Reach <span class="text-gradient">Human Eyes</span></h2>
+        <p >
+          Most companies use Applicant Tracking Systems (ATS) to filter resumes before a human even sees them. 
+          If your resume isn't ATS-optimized, you could be rejected automatically — even if you're the perfect candidate.
+        </p>
+        <div class="ats-stat animate-on-scroll">
+          <div class="ats-stat-icon"><i class="fa-solid fa-xmark"></i></div>
+          <div>
+            <div style="font-weight:700;">75% of resumes are rejected automatically</div>
+            <div style="color:var(--text-dim);font-size:0.85rem;">By ATS before a recruiter reads them</div>
+          </div>
+        </div>
+        <div class="ats-stat animate-on-scroll">
+          <div class="ats-stat-icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+          <div>
+            <div style="font-weight:700;">Wrong format = instant rejection</div>
+            <div style="color:var(--text-dim);font-size:0.85rem;">Tables, images, and columns confuse ATS parsers</div>
+          </div>
+        </div>
+        <div class="ats-stat animate-on-scroll">
+          <div class="ats-stat-icon green"><i class="fa-solid fa-check"></i></div>
+          <div>
+            <div style="font-weight:700;">HireSmart AI fixes all of this</div>
+            <div style="color:var(--text-dim);font-size:0.85rem;">Clean format, right keywords, 95%+ ATS pass rate</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 animate-on-scroll">
+        <div class="row g-3">
+          {% set ats_points = [
+            ('fa-code', 'Keyword Rich', 'Automatically suggests keywords for your target role'),
+            ('fa-align-left', 'Clean Format', 'Single-column layout that ATS scanners love'),
+            ('fa-spell-check', 'No Special Characters', 'ATS-safe fonts, symbols, and structure'),
+            ('fa-file-alt', 'Proper Headings', 'Standard section titles recognized by all ATS'),
+            ('fa-sort-amount-up', 'Right Order', 'Content ordered for maximum ATS compatibility'),
+            ('fa-download', 'PDF Perfect', 'Machine-readable PDF that parses flawlessly'),
+          ] %}
+          {% for icon, title, desc in ats_points %}
+          <div class="col-6">
+            <div class="hs-card p-3 h-100">
+              <i class="fa-solid {{ icon }} text-primary-custom mb-2"></i>
+              <div style="font-weight:700;font-size:0.9rem;">{{ title }}</div>
+              <div style="color:var(--text-dim);font-size:0.78rem;margin-top:0.3rem;">{{ desc }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ TESTIMONIALS ════════════════════ -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="text-center mb-5 animate-on-scroll">
+      <div class="section-tag">Success Stories</div>
+      <h2 class="section-title">Students Who <span class="text-gradient">Got Hired</span></h2>
+    </div>
+    <div class="row g-4">
+      {% set testimonials = [
+        ('P',  'Priya Sharma',    'CSE Graduate, IIT Bombay',       'Got into TCS Digital Role!',  '#FF6B6B',
+         'HireSmart AI completely changed my job search. My resume now passes every ATS filter and I got 3 interview calls in the first week of applying!'),
+        ('R',  'Rahul Verma',     'MCA Student, Pune University',   'Landed at Infosys BPM',       '#4ECDC4',
+         'The step-by-step wizard is so easy to use. I built my complete resume in under 30 minutes. The ATS score feature showed me exactly what to improve.'),
+        ('A',  'Anjali Singh',    'B.Tech ECE, NIT Trichy',         'Placed at Wipro Technologies','#45B7D1',
+         'I was struggling with resume formatting for months. This tool just works. Clean, professional, and the recruiters actually called me back this time!'),
+        ('K',  'Karan Mehta',     'MBA Finance, IIM Indore',        'Joined KPMG India',           '#96E6A1',
+         'The AI-generated summary saved me so much time. It captured exactly the professional tone I needed for finance roles. Highly recommend!'),
+        ('S',  'Shreya Patel',    'BCA, Gujarat University',        'Got into Cognizant',          '#DDA0DD',
+         'As a fresher with no prior work experience, I was worried. But the project and certification sections helped me build a strong profile. Got placed!'),
+        ('N',  'Nikhil Joshi',    'B.Sc CS, Mumbai University',     'Working at HCL Tech',         '#FFD93D',
+         'Downloaded my resume and submitted it to 20+ companies the same day. Got 7 interview calls. The ATS optimization is real and it works!'),
+      ] %}
+      {% for init, name, college, achievement, color, text in testimonials %}
+      <div class="col-md-6 col-lg-4 animate-on-scroll">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            {% for i in range(5) %}<i class="fa-solid fa-star"></i>{% endfor %}
+          </div>
+          <p class="testimonial-text">"{{ text }}"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar" style="background:linear-gradient(135deg,{{ color }},{{ color }}88)">{{ init }}</div>
+            <div>
+              <div class="testimonial-name">{{ name }}</div>
+              <div class="testimonial-role">{{ college }}</div>
+              <div style="color:var(--success);font-size:0.72rem;font-weight:700;margin-top:2px;">
+                <i class="fa-solid fa-trophy me-1"></i>{{ achievement }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ FAQ ════════════════════ -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="text-center mb-5 animate-on-scroll">
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title">Frequently Asked <span class="text-gradient">Questions</span></h2>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8 animate-on-scroll">
+        <div class="accordion hs-accordion" id="faqAccordion">
+          {% set faqs = [
+            ('Is HireSmart AI free to use?',
+             'Yes! HireSmart AI is completely free for students. Create your account, build your resume, and download the PDF at no cost. We believe every student deserves a great resume.'),
+            ('How does ATS optimization work?',
+             'Our resumes use a clean, single-column format with standard section headings, ATS-safe fonts, and proper keyword placement. We avoid tables, columns, images in text sections, and special characters that confuse ATS parsers.'),
+            ('Can I update my resume after creating it?',
+             'Absolutely! All your resumes are saved in your dashboard. You can edit, update, and re-download your resume anytime you need to apply for a new position.'),
+            ('What file format is the resume downloaded in?',
+             'Your resume is downloaded as a high-quality PDF — the most widely accepted format for job applications. The PDF is also ATS-readable, unlike many PDF generators.'),
+            ('Can I add my photo to the resume?',
+             'Yes! Our builder supports profile photo upload. The photo is displayed in the header of your resume for a professional look. For ATS purposes, the text content is always fully parseable.'),
+            ('How many resumes can I create?',
+             'You can create multiple resumes — one tailored for each job role or company you are targeting. This helps you customize keywords and content for each application.'),
+            ('Is my data secure?',
+             'Your data is stored securely with encrypted passwords. We never share your personal information or resume data with third parties. Your information stays private.'),
+            ('What if I forget my password?',
+             'We have a simple forgot password flow with OTP verification sent to your registered email. You can reset your password in under 2 minutes.'),
+          ] %}
+          {% for q, a in faqs %}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button {{ 'collapsed' if not loop.first }}" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq{{ loop.index }}">
+                {{ q }}
+              </button>
+            </h2>
+            <div id="faq{{ loop.index }}" class="accordion-collapse collapse {{ 'show' if loop.first }}" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">{{ a }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ CTA ════════════════════ -->
+<section class="cta-section">
+  <div class="container animate-on-scroll">
+    <div class="cta-banner">
+      <div class="position-relative">
+        <h2 class="cta-title">Ready to Land Your Dream Job?</h2>
+        <p class="cta-subtitle">
+          Join 10,000+ students who have already built their ATS-optimized resume and secured interviews.
+        </p>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('new_resume') }}" class="btn btn-cta-white px-5 py-3">
+            <i class="fa-solid fa-file-pen me-2"></i>Build Your Resume Now
+          </a>
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn btn-cta-white px-5 py-3">
+            <i class="fa-solid fa-rocket me-2"></i>Start Building for Free
+          </a>
+        {% endif %}
+        <p class="mt-3 mb-0" style="color:rgba(255,255,255,0.7);font-size:0.85rem;">
+          <i class="fa-solid fa-lock me-1"></i>No credit card required · Free forever · Instant PDF download
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

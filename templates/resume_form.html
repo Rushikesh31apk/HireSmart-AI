@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+{% block title %}Build Resume — HireSmart AI{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <input type="hidden" id="resume_id" value="{{ resume.id }}">
+
+  <!-- Header -->
+  <div class="wizard-header">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <h1 style="font-size:1.6rem;font-weight:800;margin:0;">
+            <i class="fa-solid fa-file-pen text-primary-custom me-2"></i>Resume Builder
+          </h1>
+          <p class="text-muted mb-0 small">Fill each section carefully for best ATS results</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" id="resume_title" class="form-control hs-input"
+                 placeholder="Resume Title" value="{{ resume.title or 'My Resume' }}"
+                 style="max-width:200px;">
+          <button class="btn btn-glass" id="saveBtn" title="Save Progress">
+            <i class="fa-solid fa-floppy-disk me-1"></i>Save
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="btn btn-glass" title="Back to Dashboard">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <!-- Step Wizard -->
+    <div class="wizard-progress">
+      <div class="wizard-steps">
+        {% set step_labels = ['Personal','About Me','Skills','Education','Projects','Certifications','Achievements','Hobbies'] %}
+        {% for label in step_labels %}
+        <div class="w-step {{ 'active' if loop.first }}">
+          <div class="w-step-num">
+            <i class="fa-solid fa-check" style="display:none;"></i>
+            <span class="step-idx">{{ loop.index }}</span>
+          </div>
+          <div class="w-step-label">{{ label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ─── STEP 1: Personal Info ─── -->
+    <div class="form-panel active">
+      <div class="panel-title"><i class="fa-solid fa-user-tie text-primary-custom me-2"></i>Personal Information</div>
+      <p class="panel-subtitle">This is the header of your resume — make it professional!</p>
+
+      <!-- Photo Upload -->
+      <div class="mb-4">
+        <label class="form-label">Profile Photo</label>
+        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+          <div id="photoPlaceholder" class="photo-placeholder"><i class="fa-solid fa-user"></i></div>
+          <img id="photoPreview" class="photo-preview d-none" src="#" alt="Preview">
+          <div>
+            <div style="font-weight:700;margin-bottom:0.25rem;">Click to upload photo</div>
+            <div style="color:var(--text-dim);font-size:0.82rem;">PNG, JPG or WEBP (max 5MB)</div>
+            <div style="color:var(--primary);font-size:0.8rem;margin-top:0.4rem;">
+              <i class="fa-solid fa-shield-check me-1"></i>Optional but recommended
+            </div>
+          </div>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" class="d-none">
+        <input type="hidden" id="photo_b64">
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Full Name <span class="text-danger">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-user"></i>
+            <input type="text" id="full_name" class="form-control hs-input"
+                   placeholder="e.g. Rahul Verma" value="{{ data.get('full_name','') }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Role / Job Title <span class="text-danger">*</span></label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-briefcase"></i>
+            <input type="text" id="role" class="form-control hs-input"
+                   placeholder="e.g. Full Stack Developer" value="{{ data.get('role','') }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Phone Number</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-phone"></i>
+            <input type="tel" id="phone" class="form-control hs-input"
+                   placeholder="+91 98765 43210" value="{{ data.get('phone','') }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-envelope"></i>
+            <input type="email" id="email" class="form-control hs-input"
+                   placeholder="you@email.com" value="{{ data.get('email', user.email) }}">
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address / Location</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-location-dot"></i>
+            <input type="text" id="address" class="form-control hs-input"
+                   placeholder="City, State, Country" value="{{ data.get('address','') }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">LinkedIn Profile URL</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-brands fa-linkedin"></i>
+            <input type="url" id="linkedin" class="form-control hs-input"
+                   placeholder="linkedin.com/in/yourname" value="{{ data.get('linkedin','') }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">GitHub Profile URL</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-brands fa-github"></i>
+            <input type="url" id="github" class="form-control hs-input"
+                   placeholder="github.com/yourname" value="{{ data.get('github','') }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <span></span>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: About Me <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 2: About Me ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-id-card text-primary-custom me-2"></i>Professional Summary</div>
+      <p class="panel-subtitle">Write 3-4 lines about yourself, your skills, and your career goals. This is the first thing recruiters read.</p>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label mb-0">About Me / Professional Summary</label>
+          <button type="button" id="suggestAbout" class="btn btn-glass btn-sm">
+            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>AI Suggest
+          </button>
+        </div>
+        <textarea id="about" class="form-control hs-input" rows="6"
+                  placeholder="I am a dedicated Computer Science student with expertise in...">{{ data.get('about','') }}</textarea>
+        <div class="mt-2 small text-muted">
+          <i class="fa-solid fa-circle-info me-1"></i>
+          Tip: Mention your key skills, years of experience/study, and what kind of role you're targeting.
+        </div>
+      </div>
+
+      <div class="glass-card p-3 mt-3">
+        <p class="small mb-2" style="font-weight:700;color:var(--primary);">
+          <i class="fa-solid fa-lightbulb me-1"></i>ATS Tips for Summary
+        </p>
+        <ul style="padding-left:1.2rem;">
+          <li>Include keywords matching the job description</li>
+          <li>Mention your degree, specialization, and graduation year</li>
+          <li>Highlight top 2-3 technical skills prominently</li>
+          <li>Keep it concise — 50 to 80 words is ideal</li>
+        </ul>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Skills <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 3: Skills ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-code text-primary-custom me-2"></i>Technical Skills</div>
+      <p class="panel-subtitle">List your technical skills by category. Use comma-separated values for best ATS parsing.</p>
+
+      {% set skill_fields = [
+        ('languages', 'fa-terminal',   'Programming Languages', 'e.g. Python, Java, JavaScript, C++, SQL'),
+        ('tools',     'fa-tools',      'Tools & Frameworks',    'e.g. React.js, Node.js, Flask, Git, Docker'),
+        ('databases', 'fa-database',   'Databases',             'e.g. MySQL, MongoDB, PostgreSQL, Firebase'),
+        ('core',      'fa-book-open',  'Core Subjects / Others','e.g. Data Structures, OOPS, OS, DBMS, CN'),
+      ] %}
+      {% for key, icon, label, placeholder in skill_fields %}
+      <div class="skill-input-group">
+        <div class="skill-input-label"><i class="fa-solid {{ icon }} me-2"></i>{{ label }}</div>
+        <input type="text" id="skill_{{ key }}" class="form-control hs-input"
+               placeholder="{{ placeholder }}"
+               value="{{ data.get('skills', {}).get(key, '') if data.get('skills') else '' }}">
+      </div>
+      {% endfor %}
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Education <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 4: Education ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-graduation-cap text-primary-custom me-2"></i>Education</div>
+      <p class="panel-subtitle">Add your educational qualifications, starting with the most recent.</p>
+
+      <div id="container_education" class="dynamic-container">
+        {% set education = data.get('education', [{'degree':'','school':'','year':'','gpa':''}]) %}
+        {% for edu in education %}
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn" title="Remove">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Degree / Course</label>
+              <input type="text" name="edu_degree_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. B.Tech Computer Science" value="{{ edu.get('degree','') }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Year of Passing</label>
+              <input type="text" name="edu_year_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. 2024" value="{{ edu.get('year','') }}">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">School / University</label>
+              <input type="text" name="edu_school_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. IIT Delhi" value="{{ edu.get('school','') }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">GPA / Percentage</label>
+              <input type="text" name="edu_gpa_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. 8.9 / 85%" value="{{ edu.get('gpa','') }}">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Template for new item -->
+      <template id="tpl_education">
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn"><i class="fa-solid fa-xmark"></i></button>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Degree / Course</label>
+              <input type="text" name="edu_degree___idx__" class="form-control hs-input" placeholder="e.g. B.Tech Computer Science">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Year of Passing</label>
+              <input type="text" name="edu_year___idx__" class="form-control hs-input" placeholder="e.g. 2024">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">School / University</label>
+              <input type="text" name="edu_school___idx__" class="form-control hs-input" placeholder="e.g. IIT Delhi">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">GPA / Percentage</label>
+              <input type="text" name="edu_gpa___idx__" class="form-control hs-input" placeholder="e.g. 8.9 / 85%">
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <button type="button" class="add-item-btn" data-add-item="education">
+        <i class="fa-solid fa-plus"></i>Add Another Education
+      </button>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Projects <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 5: Projects ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-diagram-project text-primary-custom me-2"></i>Projects</div>
+      <p class="panel-subtitle">Showcase your best projects. Use bullet points in description for easy ATS parsing.</p>
+
+      <div id="container_projects" class="dynamic-container">
+        {% set projects = data.get('projects', [{'name':'','tech':'','description':'','link':''}]) %}
+        {% for proj in projects %}
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn"><i class="fa-solid fa-xmark"></i></button>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Project Name</label>
+              <input type="text" name="proj_name_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. E-Commerce Platform" value="{{ proj.get('name','') }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Technologies Used</label>
+              <input type="text" name="proj_tech_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. React, Node.js, MongoDB" value="{{ proj.get('tech','') }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="proj_desc_{{ loop.index0 }}" class="form-control hs-input" rows="3"
+                        placeholder="Describe what you built, your role, and key achievements...">{{ proj.get('description','') }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Project Link (GitHub / Live)</label>
+              <input type="url" name="proj_link_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="https://github.com/you/project" value="{{ proj.get('link','') }}">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <template id="tpl_projects">
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn"><i class="fa-solid fa-xmark"></i></button>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Project Name</label>
+              <input type="text" name="proj_name___idx__" class="form-control hs-input" placeholder="e.g. E-Commerce Platform">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Technologies Used</label>
+              <input type="text" name="proj_tech___idx__" class="form-control hs-input" placeholder="e.g. React, Node.js">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="proj_desc___idx__" class="form-control hs-input" rows="3" placeholder="Describe the project..."></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Project Link</label>
+              <input type="url" name="proj_link___idx__" class="form-control hs-input" placeholder="https://github.com/...">
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <button type="button" class="add-item-btn" data-add-item="projects">
+        <i class="fa-solid fa-plus"></i>Add Another Project
+      </button>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Certifications <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 6: Certifications ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-certificate text-primary-custom me-2"></i>Certifications</div>
+      <p class="panel-subtitle">Add online courses, certifications, and training programs you've completed.</p>
+
+      <div id="container_certifications" class="dynamic-container">
+        {% set certs = data.get('certifications', [{'name':'','issuer':'','year':''}]) %}
+        {% for cert in certs %}
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn"><i class="fa-solid fa-xmark"></i></button>
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">Certification Name</label>
+              <input type="text" name="cert_name_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. AWS Cloud Practitioner" value="{{ cert.get('name','') }}">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Issuing Organization</label>
+              <input type="text" name="cert_issuer_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="e.g. Amazon Web Services" value="{{ cert.get('issuer','') }}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Year</label>
+              <input type="text" name="cert_year_{{ loop.index0 }}" class="form-control hs-input"
+                     placeholder="2024" value="{{ cert.get('year','') }}">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <template id="tpl_certifications">
+        <div class="dynamic-item">
+          <button type="button" class="remove-item-btn"><i class="fa-solid fa-xmark"></i></button>
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">Certification Name</label>
+              <input type="text" name="cert_name___idx__" class="form-control hs-input" placeholder="e.g. AWS Cloud Practitioner">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Issuing Organization</label>
+              <input type="text" name="cert_issuer___idx__" class="form-control hs-input" placeholder="e.g. Amazon Web Services">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Year</label>
+              <input type="text" name="cert_year___idx__" class="form-control hs-input" placeholder="2024">
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <button type="button" class="add-item-btn" data-add-item="certifications">
+        <i class="fa-solid fa-plus"></i>Add Another Certification
+      </button>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Achievements <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 7: Achievements ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-trophy text-primary-custom me-2"></i>Achievements</div>
+      <p class="panel-subtitle">List your academic honors, hackathon wins, competitions, and other notable accomplishments.</p>
+
+      <div class="mb-3">
+        <label class="form-label">Achievements (one per line)</label>
+        <textarea id="achievements" class="form-control hs-input" rows="8"
+                  placeholder="• Winner of Smart India Hackathon 2023&#10;• Secured 1st rank in department (Semester 3 & 4)&#10;• Published paper in IEEE conference on Machine Learning&#10;• Completed 100-day coding challenge on LeetCode (500+ problems)">{{ data.get('achievements','') }}</textarea>
+        <div class="mt-2 small text-muted">
+          <i class="fa-solid fa-info-circle me-1"></i>Start each achievement on a new line. Quantify where possible!
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-4" data-step-next>
+          Next: Hobbies <i class="fa-solid fa-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 8: Hobbies ─── -->
+    <div class="form-panel">
+      <div class="panel-title"><i class="fa-solid fa-heart text-primary-custom me-2"></i>Hobbies & Interests</div>
+      <p class="panel-subtitle">A personal touch that shows your personality. Keep it relevant and concise.</p>
+
+      <div class="mb-4">
+        <label class="form-label">Hobbies & Interests</label>
+        <textarea id="hobbies" class="form-control hs-input" rows="4"
+                  placeholder="e.g. Competitive Programming, Open Source Contributing, Technical Blogging, Chess, Photography">{{ data.get('hobbies','') }}</textarea>
+      </div>
+
+      <div class="glass-card p-4 text-center mb-4">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">🎉</div>
+        <h4 style="font-weight:800;margin-bottom:0.5rem;">Almost Done!</h4>
+        <p class="text-muted mb-3">Save your resume and preview it to see the final ATS-friendly result.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <button class="btn btn-glass px-4" id="saveBtn2"
+                  onclick="document.getElementById('saveBtn').click()">
+            <i class="fa-solid fa-floppy-disk me-2"></i>Save Draft
+          </button>
+          <button class="btn btn-primary-glow px-5 py-2" id="saveFinalBtn">
+            <i class="fa-solid fa-eye me-2"></i>Save & Preview Resume
+          </button>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-glass px-4" data-step-prev>
+          <i class="fa-solid fa-arrow-left me-2"></i>Previous
+        </button>
+        <button class="btn btn-primary-glow px-5" id="saveFinalBtn2"
+                onclick="document.getElementById('saveFinalBtn').click()">
+          <i class="fa-solid fa-eye me-2"></i>Preview Resume
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /form-page -->
+
+<!-- Save Indicator -->
+<div id="saveIndicator" class="save-indicator" style="display:none;">
+  <i class="fa-solid fa-check-circle"></i>
+  <span>Saved!</span>
+</div>
+{% endblock %}

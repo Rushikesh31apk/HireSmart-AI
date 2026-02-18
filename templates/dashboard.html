@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — HireSmart AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <h1 class="mb-1" style="font-size:1.8rem;font-weight:800;">
+            Hello, {{ user.name.split()[0] }} 👋
+          </h1>
+          <p >Manage your resumes and track your job applications</p>
+        </div>
+        <a href="{{ url_for('new_resume') }}" class="btn btn-primary-glow px-4 py-2">
+          <i class="fa-solid fa-plus me-2"></i>New Resume
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-content">
+    <div class="container">
+
+      <!-- Stats row -->
+      <div class="row g-3 mb-4">
+        {% set resume_count = resumes|length %}
+        {% set last_resume  = resumes[0] if resumes else None %}
+        <div class="col-sm-6 col-lg-3">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(0,212,255,0.15);color:var(--primary);">
+              <i class="fa-solid fa-file-alt"></i>
+            </div>
+            <div>
+              <div class="dash-stat-num text-gradient">{{ resume_count }}</div>
+              <div class="dash-stat-label">Total Resumes</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(16,185,129,0.15);color:var(--success);">
+              <i class="fa-solid fa-check-circle"></i>
+            </div>
+            <div>
+              <div class="dash-stat-num" style="color:var(--success);">95%</div>
+              <div class="dash-stat-label">ATS Score</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(245,158,11,0.15);color:var(--accent);">
+              <i class="fa-solid fa-download"></i>
+            </div>
+            <div>
+              <div class="dash-stat-num" style="color:var(--accent);">{{ resume_count }}</div>
+              <div class="dash-stat-label">Downloads</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(124,58,237,0.15);color:#a78bfa;">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+           <div>
+  <div class="dash-stat-num" style="color:#a78bfa;">
+    {{ user.created_at[2:10] if user.created_at else '-' }}
+  </div>
+  <div class="dash-stat-label">Member Since</div>
+</div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile summary card -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="hs-card h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              {% if user.avatar %}
+                <img src="{{ url_for('uploaded_file', filename=user.avatar) }}"
+                     class="profile-avatar" style="width:64px;height:64px;" alt="Avatar">
+              {% else %}
+                <div class="profile-avatar-placeholder" style="width:64px;height:64px;font-size:1.5rem;">
+                  {{ user.name[0].upper() }}
+                </div>
+              {% endif %}
+              <div>
+                <div style="font-weight:800;font-size:1.1rem;">{{ user.name }}</div>
+                <div style="color:var(--text-muted);font-size:0.82rem;">{{ user.email }}</div>
+                <span style="background:rgba(16,185,129,0.15);color:var(--success);font-size:0.7rem;
+                             padding:2px 8px;border-radius:99px;font-weight:700;">
+                  <i class="fa-solid fa-circle-check me-1"></i>Verified
+                </span>
+              </div>
+            </div>
+            <hr style="border-color:var(--border-glass);">
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('profile') }}" class="btn btn-glass btn-sm flex-fill text-center">
+                <i class="fa-solid fa-user-pen me-1"></i>Edit Profile
+              </a>
+              <a href="{{ url_for('new_resume') }}" class="btn btn-primary-glow btn-sm flex-fill text-center">
+                <i class="fa-solid fa-plus me-1"></i>New Resume
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips card -->
+        <div class="col-lg-8">
+          <div class="hs-card h-100">
+            <h5 style="font-weight:800;margin-bottom:1rem;">
+              <i class="fa-solid fa-lightbulb text-primary-custom me-2"></i>Pro Tips to Get Hired Faster
+            </h5>
+            <div class="row g-3">
+              {% set tips = [
+                ('fa-key',           'Use keywords from the job description in your resume.'),
+                ('fa-spell-check',   'Quantify your achievements — numbers stand out.'),
+                ('fa-file-lines',    'Keep your resume to 1 page for fresher positions.'),
+                ('fa-magnifying-glass', 'Customize your resume for each job you apply to.'),
+              ] %}
+              {% for icon, tip in tips %}
+              <div class="col-sm-6">
+                <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+                  <div style="width:32px;height:32px;border-radius:8px;background:var(--primary-dim);
+                              display:flex;align-items:center;justify-content:center;
+                              color:var(--primary);font-size:0.85rem;flex-shrink:0;">
+                    <i class="fa-solid {{ icon }}"></i>
+                  </div>
+                  <p style="font-size:0.85rem;color:var(--text-muted);margin:0;line-height:1.5;">{{ tip }}</p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resume List -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 style="font-weight:800;font-size:1.3rem;margin:0;">
+          <i class="fa-solid fa-folder-open text-primary-custom me-2"></i>Your Resumes
+        </h3>
+        <a href="{{ url_for('new_resume') }}" class="btn btn-primary-glow btn-sm px-3">
+          <i class="fa-solid fa-plus me-1"></i>Create New
+        </a>
+      </div>
+
+      {% if resumes %}
+        <div class="row g-4">
+          {% for resume in resumes %}
+          {% set data = resume.resume_data | tojson | safe %}
+          <div class="col-md-6 col-lg-4">
+            <div class="resume-card">
+              <div class="d-flex align-items-start justify-content-between mb-3">
+                <div class="resume-card-icon">
+                  <i class="fa-solid fa-file-user"></i>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-glass btn-sm" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-ellipsis-v"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end"
+                      style="background:var(--bg-card2);border:1px solid var(--border-glass);">
+                    <li>
+                      <a class="dropdown-item" style="color:var(--text-main);"
+                         href="{{ url_for('resume_form', resume_id=resume.id) }}">
+                        <i class="fa-solid fa-pen me-2 text-primary-custom"></i>Edit
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" style="color:var(--text-main);"
+                         href="{{ url_for('preview_resume', resume_id=resume.id) }}">
+                        <i class="fa-solid fa-eye me-2 text-primary-custom"></i>Preview
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" style="color:var(--text-main);"
+                         href="{{ url_for('download_pdf', resume_id=resume.id) }}" target="_blank">
+                        <i class="fa-solid fa-download me-2 text-success"></i>Download PDF
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider" style="border-color:var(--border-glass);"></li>
+                    <li>
+                      <form method="POST" action="{{ url_for('delete_resume', resume_id=resume.id) }}"
+                            class="delete-resume-form">
+                        <button type="submit" class="dropdown-item" style="color:#f87171;">
+                          <i class="fa-solid fa-trash me-2"></i>Delete
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="resume-card-title">{{ resume.title or 'My Resume' }}</div>
+              <div class="resume-card-date">
+                <i class="fa-solid fa-clock me-1"></i>
+                Updated: {{ resume.updated_at[:16].replace('T',' ') if resume.updated_at else '-' }}
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <a href="{{ url_for('resume_form', resume_id=resume.id) }}"
+                   class="btn btn-glass btn-sm flex-fill text-center">
+                  <i class="fa-solid fa-pen me-1"></i>Edit
+                </a>
+                <a href="{{ url_for('preview_resume', resume_id=resume.id) }}"
+                   class="btn btn-outline-primary-custom btn-sm flex-fill text-center">
+                  <i class="fa-solid fa-eye me-1"></i>Preview
+                </a>
+                <a href="{{ url_for('download_pdf', resume_id=resume.id) }}"
+                   class="btn btn-primary-glow btn-sm" target="_blank" title="Download PDF">
+                  <i class="fa-solid fa-download"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
+          <h4 style="font-weight:700;margin-bottom:0.5rem;">No Resumes Yet</h4>
+          <p class="text-muted mb-3">Create your first ATS-friendly resume and start landing interviews!</p>
+          <a href="{{ url_for('new_resume') }}" class="btn btn-primary-glow px-4 py-2">
+            <i class="fa-solid fa-plus me-2"></i>Build Your First Resume
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

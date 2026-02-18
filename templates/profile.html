@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Profile — HireSmart AI{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container py-5 mt-4">
+    <div class="row justify-content-center gy-4">
+
+      <!-- Left: Avatar + Overview -->
+      <div class="col-lg-4">
+        <div class="profile-card text-center">
+          <div class="profile-avatar-wrap d-inline-block mb-3">
+            {% if user.avatar %}
+              <img src="{{ url_for('uploaded_file', filename=user.avatar) }}"
+                   class="profile-avatar" alt="Avatar">
+            {% else %}
+              <div class="profile-avatar-placeholder">{{ user.name[0].upper() }}</div>
+            {% endif %}
+          </div>
+
+          <h4 style="font-weight:800;margin-bottom:0.25rem;">{{ user.name }}</h4>
+          <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:0.5rem;">{{ user.email }}</p>
+          <span style="background:rgba(16,185,129,0.15);color:var(--success);
+                       font-size:0.72rem;padding:3px 10px;border-radius:99px;font-weight:700;">
+            <i class="fa-solid fa-circle-check me-1"></i>Verified Account
+          </span>
+
+          <hr style="border-color:var(--border-glass);margin:1.5rem 0;">
+
+          <div class="row g-3 text-start">
+            <div class="col-12">
+              <div style="color:var(--text-dim);font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Member Since</div>
+              <div style="font-weight:600;">{{ user.created_at[:10] if user.created_at else '-' }}</div>
+            </div>
+            <div class="col-12">
+              <div style="color:var(--text-dim);font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Total Resumes</div>
+              <div style="font-weight:600;">{{ resume_count }} resume{{ 's' if resume_count != 1 }}</div>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border-glass);margin:1.5rem 0;">
+
+          <!-- Avatar upload -->
+          <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_avatar">
+            <input type="file" id="avatarFile" name="avatar" accept="image/*" class="d-none"
+                   onchange="this.form.submit()">
+            <button type="button" class="btn btn-glass btn-sm w-100"
+                    onclick="document.getElementById('avatarFile').click()">
+              <i class="fa-solid fa-camera me-2"></i>Change Photo
+            </button>
+          </form>
+
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary-custom btn-sm w-100 mt-2">
+            <i class="fa-solid fa-gauge me-1"></i>Back to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Edit forms -->
+      <div class="col-lg-8">
+
+        <!-- Update Profile -->
+        <div class="profile-card mb-4">
+          <h5 style="font-weight:800;margin-bottom:1.5rem;">
+            <i class="fa-solid fa-user-pen text-primary-custom me-2"></i>Edit Profile
+          </h5>
+          <form method="POST">
+            <input type="hidden" name="action" value="update_profile">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fa-solid fa-user"></i>
+                <input type="text" name="name" class="form-control hs-input"
+                       value="{{ user.name }}" required>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Email Address</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fa-solid fa-envelope"></i>
+                <input type="email" class="form-control hs-input" value="{{ user.email }}" disabled>
+              </div>
+              <div class="small text-muted mt-1">
+                <i class="fa-solid fa-circle-info me-1"></i>Email cannot be changed.
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary-glow px-4">
+              <i class="fa-solid fa-check me-2"></i>Save Changes
+            </button>
+          </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="profile-card">
+          <h5 style="font-weight:800;margin-bottom:1.5rem;">
+            <i class="fa-solid fa-key text-primary-custom me-2"></i>Change Password
+          </h5>
+          <form method="POST">
+            <input type="hidden" name="action" value="change_password">
+            <div class="mb-3">
+              <label class="form-label">Current Password</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fa-solid fa-lock"></i>
+                <input type="password" name="current_password" class="form-control hs-input"
+                       placeholder="Your current password" required>
+                <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">New Password</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fa-solid fa-lock-open"></i>
+                <input type="password" name="new_password" class="form-control hs-input"
+                       placeholder="Min. 8 characters" required minlength="8">
+                <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirm New Password</label>
+              <div class="input-icon-wrap">
+                <i class="input-icon fa-solid fa-shield-halved"></i>
+                <input type="password" name="confirm_password" class="form-control hs-input"
+                       placeholder="Repeat new password" required>
+                <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary-glow px-4">
+              <i class="fa-solid fa-key me-2"></i>Update Password
+            </button>
+          </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="profile-card mt-4" style="border-color:rgba(239,68,68,0.3);">
+          <h5 style="font-weight:800;margin-bottom:0.5rem;color:#f87171;">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>Account
+          </h5>
+          <p class="text-muted small mb-3">Need to sign out from all sessions?</p>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm px-3">
+            <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Login — HireSmart AI{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="hero-orb orb-1" style="opacity:0.2;"></div>
+  <div class="hero-orb orb-2" style="opacity:0.2;"></div>
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="hs-brand justify-content-center">
+          <span class="brand-icon"><i class="fa-solid fa-bolt-lightning"></i></span>
+          HireSmart<span class="brand-accent">AI</span>
+        </div>
+      </div>
+      <h2 class="auth-title">Welcome Back 👋</h2>
+      <p class="auth-subtitle">Log in to your account to continue building your resume</p>
+
+      <form method="POST" action="{{ url_for('login') }}" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-envelope"></i>
+            <input type="email" name="email" class="form-control hs-input"
+                   placeholder="you@example.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label mb-0">Password</label>
+            <a href="{{ url_for('forgot_password') }}" class="small text-primary-custom text-decoration-none">Forgot password?</a>
+          </div>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-lock"></i>
+            <input type="password" name="password" class="form-control hs-input"
+                   placeholder="••••••••" required autocomplete="current-password">
+            <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary-glow w-100 py-3 fw-700">
+          <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>New to HireSmart AI?</span></div>
+      <a href="{{ url_for('register') }}" class="btn btn-glass w-100 py-2 text-center">
+        <i class="fa-solid fa-user-plus me-2"></i>Create Free Account
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

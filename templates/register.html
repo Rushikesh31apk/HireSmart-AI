@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Register — HireSmart AI{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="hero-orb orb-1" style="opacity:0.2;"></div>
+  <div class="hero-orb orb-2" style="opacity:0.2;"></div>
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="hs-brand justify-content-center">
+          <span class="brand-icon"><i class="fa-solid fa-bolt-lightning"></i></span>
+          HireSmart<span class="brand-accent">AI</span>
+        </div>
+      </div>
+      <h2 class="auth-title">Create Your Account 🚀</h2>
+      <p class="auth-subtitle">Join 10,000+ students building ATS-friendly resumes</p>
+
+      <form method="POST" action="{{ url_for('register') }}" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-user"></i>
+            <input type="text" name="name" class="form-control hs-input"
+                   placeholder="Your Full Name" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-envelope"></i>
+            <input type="email" name="email" class="form-control hs-input"
+                   placeholder="you@example.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-lock"></i>
+            <input type="password" name="password" class="form-control hs-input"
+                   placeholder="Min. 8 characters" required minlength="8">
+            <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Confirm Password</label>
+          <div class="input-icon-wrap">
+            <i class="input-icon fa-solid fa-shield-halved"></i>
+            <input type="password" name="confirm_password" class="form-control hs-input"
+                   placeholder="Repeat your password" required>
+            <span class="toggle-pass"><i class="fa-solid fa-eye"></i></span>
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="termsCheck" required>
+            <label class="form-check-label small text-muted" for="termsCheck">
+              I agree to the <a href="#" class="text-primary-custom">Terms of Service</a> and
+              <a href="#" class="text-primary-custom">Privacy Policy</a>
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary-glow w-100 py-3">
+          <i class="fa-solid fa-rocket me-2"></i>Create Account
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>Already have an account?</span></div>
+      <a href="{{ url_for('login') }}" class="btn btn-glass w-100 py-2 text-center">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+      </a>
+
+      <div class="mt-3 text-center">
+        <p class="small text-muted mb-0">
+          <i class="fa-solid fa-lock me-1 text-success"></i>
+          Your data is secure and never shared.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
