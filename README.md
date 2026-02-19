@@ -77,6 +77,9 @@ To empower students and job seekers with professional, ATS-optimized resumes tha
 - Dashboard
 ![Algorithm](image10.png)
 
+- Steps
+![Algorithm](image12.png)
+
 - Output
 ![Output](image11.png)
 
