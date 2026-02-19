@@ -251,17 +251,6 @@ hiresmart-ai/
 
 ---
 
-## 🛠️ How Style Selection Works
-
-1. **Preview page** renders both resume designs from the same Jinja2 data
-2. User clicks a card → `selectStyle('A'|'B')` fires in `main.js`
-3. Choice is persisted in `sessionStorage` keyed by resume ID
-4. On "Download PDF" click, `?style=A` or `?style=B` is appended to the URL
-5. `download_pdf` route reads the param and calls `generate_pdf_style_a` or `generate_pdf_style_b`
-6. Both PDF generators mirror their HTML counterparts exactly — same colors, layout, spacing
-
----
-
 ## 🎊 Mission Accomplished
 
 **HireSmart AI is production-ready!**
