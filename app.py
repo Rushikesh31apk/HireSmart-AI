@@ -549,215 +549,229 @@ def download_pdf(resume_id):
                      download_name=f"{name}_Resume.pdf")
 
 def generate_pdf(data, user):
-    """Generate ATS-friendly PDF resume using ReportLab."""
+    """
+    Classic Prestige — mirrors the .rA CSS block in preview_resume.html
+    - Playfair Display feel via Helvetica-Bold (ReportLab built-in)
+    - Navy (#1e3a5f) headings, gold (#c9a84c) role subtitle
+    - Teal (#14b8a6) rule under header, light grey section dividers
+    - Single-column, all sections stacked vertically
+    """
     buf = BytesIO()
-
-    # Page setup
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
-        leftMargin=1.5*cm, rightMargin=1.5*cm,
-        topMargin=1.5*cm,  bottomMargin=1.5*cm
+        leftMargin=1.8*cm, rightMargin=1.8*cm,
+        topMargin=1.6*cm,  bottomMargin=1.6*cm
     )
 
-    # Color palette
-    navy  = colors.HexColor('#1a1a4e')
-    teal  = colors.HexColor('#00b4d8')
-    gray  = colors.HexColor('#555555')
-    lgray = colors.HexColor('#888888')
-    line  = colors.HexColor('#dee2e6')
-    white = colors.white
-
-    # Styles
-    styles = getSampleStyleSheet()
+    # ── Palette (matches .rA CSS variables) ──────────────────────────────────
+    navy  = colors.HexColor('#1e3a5f')   # --accent1
+    gold  = colors.HexColor('#c9a84c')   # --gold
+    teal  = colors.HexColor('#14b8a6')   # accent teal
+    gray  = colors.HexColor('#475569')   # --ink-soft
+    lgray = colors.HexColor('#94a3b8')
+    dline = colors.HexColor('#d1dce8')   # section divider
+    ink   = colors.HexColor('#0f172a')   # --ink
 
     def st(name, **kw):
         return ParagraphStyle(name, **kw)
 
-    name_style = st('Name', fontName='Helvetica-Bold', fontSize=22,
-                    textColor=navy, spaceAfter=2)
-    role_style = st('Role', fontName='Helvetica', fontSize=12,
-                    textColor=teal, spaceAfter=4)
-    contact_style = st('Contact', fontName='Helvetica', fontSize=9,
-                       textColor=gray, spaceAfter=2)
-    section_style = st('Section', fontName='Helvetica-Bold', fontSize=11,
-                       textColor=navy, spaceBefore=10, spaceAfter=4)
-    body_style = st('Body', fontName='Helvetica', fontSize=9.5,
-                    textColor=gray, leading=14, spaceAfter=2)
-    bullet_style = st('Bullet', fontName='Helvetica', fontSize=9.5,
-                      textColor=gray, leading=14, leftIndent=12, spaceAfter=1,
-                      bulletIndent=4)
-    small_style = st('Small', fontName='Helvetica', fontSize=8.5,
-                     textColor=lgray, spaceAfter=2)
+    # Typography — mirroring the HTML exactly
+    name_style    = st('A_Name',    fontName='Helvetica-Bold', fontSize=22,
+                       textColor=navy, spaceAfter=2, leading=26)
+    role_style    = st('A_Role',    fontName='Helvetica-Bold', fontSize=10,
+                       textColor=gold, spaceAfter=5, leading=13,
+                       wordWrap='LTR')
+    contact_style = st('A_Contact', fontName='Helvetica', fontSize=8.5,
+                       textColor=gray, spaceAfter=1, leading=12)
+    section_style = st('A_Section', fontName='Helvetica-Bold', fontSize=9.5,
+                       textColor=navy, spaceBefore=8, spaceAfter=3,
+                       leading=13, wordWrap='LTR')
+    body_style    = st('A_Body',    fontName='Helvetica', fontSize=9,
+                       textColor=gray, leading=13.5, spaceAfter=2)
+    bold_body     = st('A_BoldBody',fontName='Helvetica-Bold', fontSize=9,
+                       textColor=ink, leading=13, spaceAfter=1)
+    small_style   = st('A_Small',   fontName='Helvetica', fontSize=8,
+                       textColor=lgray, leading=12, spaceAfter=2)
+    bullet_style  = st('A_Bullet',  fontName='Helvetica', fontSize=9,
+                       textColor=gray, leading=13, leftIndent=10,
+                       spaceAfter=1, bulletIndent=3)
+    skill_lbl     = st('A_SkLbl',   fontName='Helvetica-Bold', fontSize=9,
+                       textColor=ink, leading=13)
+    skill_val     = st('A_SkVal',   fontName='Helvetica', fontSize=9,
+                       textColor=gray, leading=13)
 
     story = []
 
-    # ── HEADER ──────────────────────────────────────────────────────────────────
+    # ── HEADER ───────────────────────────────────────────────────────────────
     full_name = data.get('full_name') or user['name'] or ''
-    role      = data.get('role', '')
+    role_txt  = data.get('role', '')
     phone     = data.get('phone', '')
-    email     = data.get('email') or user['email'] or ''
+    email_txt = data.get('email') or user['email'] or ''
     address   = data.get('address', '')
     linkedin  = data.get('linkedin', '')
     github    = data.get('github', '')
 
-    # Photo
     photo_file = data.get('photo_file')
-    photo_path = (os.path.join(app.config['UPLOAD_FOLDER'], photo_file)
-                  if photo_file else None)
-    has_photo  = photo_path and os.path.exists(photo_path)
+    photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_file) if photo_file else None
+    has_photo  = bool(photo_path and os.path.exists(photo_path))
 
-    contact_parts = [p for p in [phone, email, address] if p]
+    contact_parts = [p for p in [phone, email_txt, address] if p]
     link_parts    = [p for p in [linkedin, github] if p]
+
+    # Build name/role/contact block
+    info_items = [Paragraph(full_name, name_style)]
+    if role_txt:
+        info_items.append(Paragraph(role_txt.upper(), role_style))
+    if contact_parts:
+        info_items.append(Paragraph('  |  '.join(contact_parts), contact_style))
+    if link_parts:
+        info_items.append(Paragraph('  |  '.join(link_parts), contact_style))
 
     if has_photo:
         try:
-            img = RLImage(photo_path, width=2.5*cm, height=2.5*cm)
+            img = RLImage(photo_path, width=2.4*cm, height=2.4*cm)
             img.hAlign = 'RIGHT'
-            name_block = [
-                Paragraph(full_name, name_style),
-                Paragraph(role, role_style),
-                Paragraph(' | '.join(contact_parts), contact_style),
-                Paragraph(' | '.join(link_parts), contact_style) if link_parts else Spacer(1,1),
-            ]
-            tbl = Table([[name_block, img]], colWidths=['*', 2.8*cm])
+            tbl = Table([[info_items, img]], colWidths=['*', 2.7*cm])
             tbl.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'TOP'),
                 ('ALIGN',  (1,0), (1,0),  'RIGHT'),
+                ('TOPPADDING',    (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
             ]))
             story.append(tbl)
         except Exception:
-            story.append(Paragraph(full_name, name_style))
-            story.append(Paragraph(role, role_style))
-            story.append(Paragraph(' | '.join(contact_parts), contact_style))
+            for item in info_items:
+                story.append(item)
     else:
-        story.append(Paragraph(full_name, name_style))
-        story.append(Paragraph(role, role_style))
-        story.append(Paragraph(' | '.join(contact_parts), contact_style))
-        if link_parts:
-            story.append(Paragraph(' | '.join(link_parts), contact_style))
+        for item in info_items:
+            story.append(item)
 
-    story.append(HRFlowable(width='100%', thickness=1.5, color=teal, spaceAfter=8))
+    # Thick teal rule under header (mirrors border-bottom: 3px solid var(--accent1) in .rA-header)
+    story.append(HRFlowable(width='100%', thickness=2.5, color=teal, spaceAfter=8, spaceBefore=4))
 
-    def section_header(title):
+    # ── Helper: section title + thin divider ─────────────────────────────────
+    def sec(title):
         story.append(Paragraph(title.upper(), section_style))
-        story.append(HRFlowable(width='100%', thickness=0.5, color=line, spaceAfter=4))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=dline, spaceAfter=5))
 
-    # ── ABOUT ────────────────────────────────────────────────────────────────────
+    # ── PROFESSIONAL SUMMARY ─────────────────────────────────────────────────
     about = data.get('about', '').strip()
     if about:
-        section_header('Professional Summary')
+        sec('Professional Summary')
         story.append(Paragraph(about, body_style))
+        story.append(Spacer(1, 2))
 
-    # ── SKILLS ───────────────────────────────────────────────────────────────────
+    # ── TECHNICAL SKILLS ─────────────────────────────────────────────────────
     skills = data.get('skills', {})
-    if any(skills.values() if isinstance(skills, dict) else [skills]):
-        section_header('Technical Skills')
-        if isinstance(skills, dict):
-            rows = []
-            labels = {
-                'languages':  'Languages',
-                'tools':      'Tools & Frameworks',
-                'databases':  'Databases',
-                'core':       'Core Subjects',
-            }
-            for key, label in labels.items():
-                val = skills.get(key, '').strip()
-                if val:
-                    rows.append([
-                        Paragraph(f'<b>{label}:</b>', body_style),
-                        Paragraph(val, body_style)
-                    ])
-            if rows:
-                skill_tbl = Table(rows, colWidths=[3.5*cm, '*'])
-                skill_tbl.setStyle(TableStyle([
-                    ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                    ('TOPPADDING',    (0,0), (-1,-1), 2),
-                    ('BOTTOMPADDING', (0,0), (-1,-1), 2),
-                ]))
-                story.append(skill_tbl)
-        else:
-            story.append(Paragraph(str(skills), body_style))
+    skill_labels = [
+        ('languages', 'Languages'),
+        ('tools',     'Tools & Frameworks'),
+        ('databases', 'Databases'),
+        ('core',      'Core Subjects'),
+    ]
+    skill_rows = [(lbl, skills.get(key, '').strip())
+                  for key, lbl in skill_labels
+                  if isinstance(skills, dict) and skills.get(key, '').strip()]
+    if skill_rows:
+        sec('Technical Skills')
+        tbl_rows = [[Paragraph(f'{lbl}:', skill_lbl), Paragraph(val, skill_val)]
+                    for lbl, val in skill_rows]
+        sk_tbl = Table(tbl_rows, colWidths=[3.8*cm, '*'])
+        sk_tbl.setStyle(TableStyle([
+            ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+            ('TOPPADDING',    (0,0), (-1,-1), 2),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+        ]))
+        story.append(sk_tbl)
+        story.append(Spacer(1, 2))
 
-    # ── EDUCATION ────────────────────────────────────────────────────────────────
+    # ── EDUCATION ────────────────────────────────────────────────────────────
     education = data.get('education', [])
-    if education:
-        section_header('Education')
-        for edu in education:
-            if not isinstance(edu, dict): continue
+    edu_items = [e for e in education if isinstance(e, dict) and e.get('degree')]
+    if edu_items:
+        sec('Education')
+        for edu in edu_items:
             deg    = edu.get('degree', '')
             school = edu.get('school', '')
             year   = edu.get('year', '')
             gpa    = edu.get('gpa', '')
-            right  = f"{year}  {gpa}".strip()
+            right  = ' | '.join(filter(None, [year, gpa]))
             row = Table(
-                [[Paragraph(f'<b>{deg}</b>', body_style),
-                  Paragraph(right, small_style)]],
-                colWidths=['*', 4*cm]
+                [[Paragraph(f'<b>{deg}</b>', body_style), Paragraph(right, small_style)]],
+                colWidths=['*', 3.5*cm]
             )
-            row.setStyle(TableStyle([('ALIGN', (1,0), (1,0), 'RIGHT'),
-                                     ('TOPPADDING', (0,0), (-1,-1), 1),
-                                     ('BOTTOMPADDING', (0,0), (-1,-1), 1)]))
+            row.setStyle(TableStyle([
+                ('ALIGN',         (1,0), (1,0),  'RIGHT'),
+                ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+                ('TOPPADDING',    (0,0), (-1,-1), 1),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+            ]))
             story.append(row)
             if school:
                 story.append(Paragraph(school, small_style))
-            story.append(Spacer(1, 3))
-
-    # ── PROJECTS ─────────────────────────────────────────────────────────────────
-    projects = data.get('projects', [])
-    if projects:
-        section_header('Projects')
-        for proj in projects:
-            if not isinstance(proj, dict): continue
-            name  = proj.get('name', '')
-            tech  = proj.get('tech', '')
-            desc  = proj.get('description', '')
-            link  = proj.get('link', '')
-            header_txt = f'<b>{name}</b>'
-            if tech: header_txt += f'  <font color="#888888" size="8">| {tech}</font>'
-            story.append(Paragraph(header_txt, body_style))
-            if desc:
-                for line_txt in desc.split('\n'):
-                    line_txt = line_txt.strip()
-                    if line_txt:
-                        story.append(Paragraph(f'• {line_txt}', bullet_style))
-            if link:
-                story.append(Paragraph(f'<font color="#00b4d8">🔗 {link}</font>', small_style))
             story.append(Spacer(1, 4))
 
-    # ── CERTIFICATIONS ───────────────────────────────────────────────────────────
+    # ── PROJECTS ─────────────────────────────────────────────────────────────
+    projects = data.get('projects', [])
+    proj_items = [p for p in projects if isinstance(p, dict) and p.get('name')]
+    if proj_items:
+        sec('Projects')
+        for proj in proj_items:
+            name_txt  = proj.get('name', '')
+            tech      = proj.get('tech', '')
+            desc      = proj.get('description', '')
+            link      = proj.get('link', '')
+            hdr = f'<b>{name_txt}</b>'
+            if tech:
+                hdr += f'  <font color="#94a3b8" size="7.5">| {tech}</font>'
+            story.append(Paragraph(hdr, body_style))
+            if desc:
+                for line in desc.split('\n'):
+                    line = line.strip().lstrip('•-').strip()
+                    if line:
+                        story.append(Paragraph(f'• {line}', bullet_style))
+            if link:
+                story.append(Paragraph(
+                    f'<font color="#14b8a6">🔗 {link}</font>', small_style))
+            story.append(Spacer(1, 5))
+
+    # ── CERTIFICATIONS ───────────────────────────────────────────────────────
     certs = data.get('certifications', [])
-    if certs:
-        section_header('Certifications')
-        for cert in certs:
-            if not isinstance(cert, dict): continue
-            n    = cert.get('name', '')
+    cert_items = [c for c in certs if isinstance(c, dict) and c.get('name')]
+    if cert_items:
+        sec('Certifications')
+        for cert in cert_items:
+            n      = cert.get('name', '')
             issuer = cert.get('issuer', '')
-            year = cert.get('year', '')
-            txt  = f'<b>{n}</b>'
-            if issuer: txt += f' — {issuer}'
+            year   = cert.get('year', '')
+            txt    = f'<b>{n}</b>'
+            if issuer:
+                txt += f' — <font color="#475569">{issuer}</font>'
             row = Table(
                 [[Paragraph(txt, body_style), Paragraph(year, small_style)]],
-                colWidths=['*', 3*cm]
+                colWidths=['*', 2.8*cm]
             )
-            row.setStyle(TableStyle([('ALIGN', (1,0), (1,0), 'RIGHT'),
-                                     ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                                     ('TOPPADDING', (0,0), (-1,-1), 1),
-                                     ('BOTTOMPADDING', (0,0), (-1,-1), 1)]))
+            row.setStyle(TableStyle([
+                ('ALIGN',         (1,0), (1,0),  'RIGHT'),
+                ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+                ('TOPPADDING',    (0,0), (-1,-1), 1),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+            ]))
             story.append(row)
 
-    # ── ACHIEVEMENTS ─────────────────────────────────────────────────────────────
+    # ── ACHIEVEMENTS ─────────────────────────────────────────────────────────
     achievements = data.get('achievements', '').strip()
     if achievements:
-        section_header('Achievements')
-        for line_txt in achievements.split('\n'):
-            line_txt = line_txt.strip()
-            if line_txt:
-                story.append(Paragraph(f'• {line_txt}', bullet_style))
+        sec('Achievements')
+        for line in achievements.split('\n'):
+            line = line.strip().lstrip('•-').strip()
+            if line:
+                story.append(Paragraph(f'• {line}', bullet_style))
 
-    # ── HOBBIES ──────────────────────────────────────────────────────────────────
+    # ── HOBBIES ──────────────────────────────────────────────────────────────
     hobbies = data.get('hobbies', '').strip()
     if hobbies:
-        section_header('Interests & Hobbies')
+        sec('Interests & Hobbies')
         story.append(Paragraph(hobbies, body_style))
 
     doc.build(story)

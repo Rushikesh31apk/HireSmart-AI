@@ -85,7 +85,6 @@ document.querySelectorAll('.otp-digit').forEach((digit, idx, all) => {
   digit.addEventListener('input', () => {
     digit.value = digit.value.replace(/\D/g, '').slice(0, 1);
     if (digit.value && idx < all.length - 1) all[idx + 1].focus();
-    // Update hidden full OTP
     const otpFull = document.getElementById('otp_full');
     if (otpFull) otpFull.value = Array.from(all).map(d => d.value).join('');
   });
@@ -169,7 +168,6 @@ const ResumeWizard = (() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Navigation buttons
   document.querySelectorAll('[data-step-next]').forEach(btn => {
     btn.addEventListener('click', () => goTo(currentStep + 1));
   });
@@ -192,7 +190,6 @@ const ResumeWizard = (() => {
         if (img) img.src = e.target.result;
         document.getElementById('photoPlaceholder')?.classList.add('d-none');
         img?.classList.remove('d-none');
-        // Store b64 in hidden field
         const hid = document.getElementById('photo_b64');
         if (hid) hid.value = e.target.result;
       };
@@ -209,7 +206,6 @@ const ResumeWizard = (() => {
       if (template && container) {
         const clone = template.content.cloneNode(true);
         const idx   = container.children.length;
-        // Update indices
         clone.querySelectorAll('[name]').forEach(el => {
           el.name = el.name.replace('__idx__', idx);
           el.id   = el.id?.replace('__idx__', idx) || el.id;
@@ -227,50 +223,40 @@ const ResumeWizard = (() => {
   }
   document.querySelectorAll('.dynamic-container').forEach(attachRemoveListeners);
 
-  // Save form data
-  const saveBtn = document.getElementById('saveBtn');
-  const saveFinalBtn = document.getElementById('saveFinalBtn');
-
+  // ── Collect form data ─────────────────────────────────────────
   const collectData = () => {
     const fd = {};
-    // Personal
     ['full_name','role','phone','email','address','linkedin','github','about'].forEach(k => {
       const el = document.getElementById(k);
       if (el) fd[k] = el.value.trim();
     });
-    // Photo
     const pb = document.getElementById('photo_b64');
     if (pb?.value) fd.photo_b64 = pb.value;
 
-    // Skills
     fd.skills = {};
     ['languages','tools','databases','core'].forEach(k => {
       const el = document.getElementById(`skill_${k}`);
       if (el) fd.skills[k] = el.value.trim();
     });
 
-    // Education
     fd.education = [];
     document.querySelectorAll('#container_education .dynamic-item').forEach((item, i) => {
       const get = (n) => item.querySelector(`[name="edu_${n}_${i}"]`)?.value.trim() || '';
       fd.education.push({ degree: get('degree'), school: get('school'), year: get('year'), gpa: get('gpa') });
     });
 
-    // Projects
     fd.projects = [];
     document.querySelectorAll('#container_projects .dynamic-item').forEach((item, i) => {
       const get = (n) => item.querySelector(`[name="proj_${n}_${i}"]`)?.value.trim() || '';
       fd.projects.push({ name: get('name'), tech: get('tech'), description: get('desc'), link: get('link') });
     });
 
-    // Certifications
     fd.certifications = [];
     document.querySelectorAll('#container_certifications .dynamic-item').forEach((item, i) => {
       const get = (n) => item.querySelector(`[name="cert_${n}_${i}"]`)?.value.trim() || '';
       fd.certifications.push({ name: get('name'), issuer: get('issuer'), year: get('year') });
     });
 
-    // Text areas
     ['achievements','hobbies'].forEach(k => {
       const el = document.getElementById(k);
       if (el) fd[k] = el.value.trim();
@@ -280,6 +266,7 @@ const ResumeWizard = (() => {
     return { title: titleEl?.value.trim() || 'My Resume', data: fd };
   };
 
+  // ── Save and optionally redirect ──────────────────────────────
   const doSave = async (redirectUrl) => {
     if (!resumeId) return;
     const payload = collectData();
@@ -298,17 +285,22 @@ const ResumeWizard = (() => {
     } catch { showSaveIndicator('Error!'); }
   };
 
+  const saveBtn      = document.getElementById('saveBtn');
+  const saveFinalBtn = document.getElementById('saveFinalBtn');
+
   if (saveBtn) saveBtn.addEventListener('click', () => doSave(null));
+
+  // ── CHANGED: carry the last-chosen style into the preview URL ─
   if (saveFinalBtn) {
     saveFinalBtn.addEventListener('click', () => {
-      doSave(`/resume/${resumeId}/preview`);
+      // Read whatever style was last picked on the preview page (default A)
+      const savedStyle = sessionStorage.getItem(`hs_style_${resumeId}`) || 'A';
+      doSave(`/resume/${resumeId}/preview?style=${savedStyle}`);
     });
   }
 
-  // Auto-save every 30s
-  if (resumeId) {
-    setInterval(() => doSave(null), 30000);
-  }
+  // Auto-save every 30 s (no redirect)
+  if (resumeId) setInterval(() => doSave(null), 30000);
 
   // AI suggest summary
   const suggestBtn = document.getElementById('suggestAbout');
@@ -369,3 +361,92 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// ── ADDED: Resume Style Selection (preview_resume.html logic) ──
+// ═══════════════════════════════════════════════════════════════
+
+(function initStyleSelector() {
+  // Only runs when the two-style preview page is present
+  const cardA = document.getElementById('cardA');
+  const cardB = document.getElementById('cardB');
+  if (!cardA || !cardB) return;
+
+  // Read resumeId from a data attribute on either card (set via Jinja: data-resume-id="{{ resume.id }}")
+  const resumeId = cardA.dataset.resumeId || '';
+
+  // Storage key is per-resume so switching tabs doesn't bleed across resumes
+  const STORAGE_KEY = `hs_style_${resumeId}`;
+
+  // ── Core select function (also exported to window for onclick= in template) ──
+  window.selectStyle = function (s) {
+    // Persist choice
+    if (resumeId) sessionStorage.setItem(STORAGE_KEY, s);
+
+    const label  = document.getElementById('selectedLabel');
+    const dlA    = document.getElementById('btnDownloadA');
+    const dlB    = document.getElementById('btnDownloadB');
+
+    if (s === 'A') {
+      cardA.className = 'style-card selected-a';
+      cardB.className = 'style-card';
+      if (label) label.textContent = 'Style A — Classic Prestige selected';
+      if (dlA)   dlA.style.display = '';
+      if (dlB)   dlB.style.display = 'none';
+    } else {
+      cardA.className = 'style-card';
+      cardB.className = 'style-card selected-b';
+      if (label) label.textContent = 'Style B — Modern Edge selected';
+      if (dlA)   dlA.style.display = 'none';
+      if (dlB)   dlB.style.display = '';
+    }
+  };
+
+  // ── Restore last-chosen style on page load ────────────────────
+  // Also respect ?style= param in the URL (e.g. when coming back from edit)
+  const urlStyle = new URLSearchParams(window.location.search).get('style');
+  const stored   = sessionStorage.getItem(STORAGE_KEY);
+  const initial  = (urlStyle === 'A' || urlStyle === 'B') ? urlStyle
+                 : (stored   === 'A' || stored   === 'B') ? stored
+                 : 'A';                                      // default
+
+  // Apply without animation flash on first load
+  selectStyle(initial);
+
+  // ── Scale preview cards to fill their column ──────────────────
+  function scaleResume(wrapperId, innerId) {
+    const wrap  = document.getElementById(wrapperId);
+    const inner = document.getElementById(innerId);
+    if (!wrap || !inner) return;
+    const available = wrap.clientWidth;
+    const natural   = inner.offsetWidth || 794;
+    const scale     = available / natural;
+    inner.style.transform       = `scale(${scale})`;
+    inner.style.transformOrigin = 'top left';
+    // Collapse the whitespace that scaling leaves at the bottom
+    inner.style.marginBottom = `-${natural * (1 - scale)}px`;
+  }
+
+  function scaleAll() {
+    scaleResume('wrapA', 'innerA');
+    scaleResume('wrapB', 'innerB');
+  }
+
+  window.addEventListener('load',   scaleAll);
+  window.addEventListener('resize', scaleAll);
+  // Run immediately in case load already fired
+  scaleAll();
+
+  // ── Keep download links' ?style= param in sync ────────────────
+  // This covers toolbar "Download PDF" button and any other links
+  // that use the generic /resume/<id>/download_pdf URL without a style param.
+  document.querySelectorAll('a[href*="download_pdf"]').forEach(link => {
+    link.addEventListener('click', function () {
+      const chosen = sessionStorage.getItem(STORAGE_KEY) || 'A';
+      const url    = new URL(this.href, window.location.origin);
+      url.searchParams.set('style', chosen);
+      this.href = url.toString();
+    });
+  });
+
+})();
